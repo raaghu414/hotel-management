@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Horizon | Luxury Hotel & Resort</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <div class="logo" style="display:flex; align-items:center; gap:10px;">
+            <img src="logo.jpeg" alt="Logo" style="height:50px; border-radius:5px;">
+            RANKING STAR
+        </div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#rooms">Rooms</a>
+            <a href="#menu">Dining</a>
+            <a href="#contact">Contact</a>
+            <a href="/admin.html" class="btn-small">Staff Login</a>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <h1>Welcome to Ranking Star Resorts</h1>
+        <p>A premium stay where comfort meets luxury. Discover the art of hospitality.</p>
+        <button class="btn" onclick="scrollToId('rooms')">View Our Rooms</button>
+    </section>
+
+    <section id="rooms">
+        <div class="section-title">
+            <h2>Luxury Accommodations</h2>
+            <p>Elegantly designed suites for the discerning traveler</p>
+        </div>
+        <div class="rooms-grid" id="rooms-container">
+            <!-- Rooms will be loaded here -->
+        </div>
+    </section>
+
+    <section id="menu" class="glass" style="margin: 2rem 5%; border-radius: 20px;">
+        <div class="section-title">
+            <h2>Signature Dining</h2>
+            <p>Experience culinary Excellence at our world-class restaurant</p>
+        </div>
+        <div class="menu-grid" id="menu-container">
+            <!-- Menu items will be loaded here -->
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="section-title">
+            <h2>Contact Us</h2>
+            <p>We are here to assist you with your stay</p>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+            <div class="glass" style="padding: 2rem; min-width: 300px; text-align: center;">
+                <h3>Location & Info</h3>
+                <p>123 Luxury Way, Paradise Coast</p>
+                <p>Email: stay@rankingstar.com</p>
+                <p>Phone: +1 (555) 987-6543</p>
+            </div>
+            <div class="glass" style="padding: 2rem; min-width: 300px; text-align: center;">
+                <h3>Working Hours</h3>
+                <p>Check-in: 2:00 PM</p>
+                <p>Check-out: 11:00 AM</p>
+                <p>Reception: 24/7</p>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 3rem; background: var(--secondary);">
+        <h3 style="color:var(--gold); margin-bottom:1rem;">RANKING STAR RESORTS</h3>
+        <p style="color:var(--text-muted);">&copy; 2026 Ranking Star Resorts. All rights reserved.</p>
+        <p style="margin-top:1rem; font-weight:700; color:var(--gold);">Developed by Raghavendra Prasad D G</p>
+    </footer>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="modal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+        <div class="glass" style="max-width: 500px; width: 90%; padding: 2rem;">
+            <h3>Book <span id="modal-room-name"></span></h3>
+            <form id="booking-form" style="display:flex; flex-direction:column; gap:1rem; margin-top:1.5rem;">
+                <input type="hidden" id="modal-room-id">
+                <input type="text" placeholder="Full Name" required class="glass" style="padding:0.8rem; color:white;">
+                <input type="email" placeholder="Email Address" required class="glass" style="padding:0.8rem; color:white;">
+                <div style="display:flex; gap:1rem;">
+                    <input type="date" required class="glass" style="padding:0.8rem; color:white; flex:1;">
+                    <input type="number" placeholder="Guests" min="1" max="4" required class="glass" style="padding:0.8rem; color:white; width:80px;">
+                </div>
+                <button type="submit" class="btn">Confirm Booking</button>
+                <button type="button" onclick="closeModal()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

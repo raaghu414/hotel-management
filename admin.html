@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Grand Horizon</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body style="background: var(--primary);">
+    <!-- Login Screen -->
+    <div id="login-container" style="display:flex; height:100vh; align-items:center; justify-content:center;">
+        <div class="glass" style="padding: 3rem; width: 400px; text-align: center;">
+            <h2 style="margin-bottom:2rem; color:var(--gold);">Staff Portal</h2>
+            <form id="login-form" style="display:flex; flex-direction:column; gap:1.5rem;">
+                <input type="text" placeholder="Username" required class="glass" style="padding:1rem; color:white;">
+                <input type="password" placeholder="Password" required class="glass" style="padding:1rem; color:white;">
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <p id="login-error" style="color:var(--accent); margin-top:1rem; display:none;">Invalid credentials</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-container" style="display:none;" class="dashboard-container">
+        <aside class="sidebar">
+            <div style="text-align:center; margin-bottom:2rem;">
+                <img src="logo.jpeg" alt="Logo" style="width:80px; border-radius:10px; margin-bottom:1rem;">
+                <h2 style="color:var(--gold); font-size:1.2rem;">RANKING STAR</h2>
+            </div>
+            <ul>
+                <li onclick="showSection('overview')">Overview</li>
+                <li onclick="showSection('rooms')">Manage Rooms</li>
+                <li onclick="showSection('reservations')">Reservations</li>
+                <li onclick="logout()" style="margin-top:4rem; color:var(--accent);">Logout</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                <h1 id="section-title">Overview</h1>
+                <div id="user-info" style="color:var(--text-muted);">Welcome, <span id="admin-name" style="color:white; font-weight:700;">Admin</span></div>
+            </header>
+
+            <div id="section-overview">
+                <div class="stat-cards">
+                    <div class="stat-card glass">
+                        <p>Total Revenue</p>
+                        <h2 id="stat-revenue">$0</h2>
+                    </div>
+                    <div class="stat-card glass">
+                        <p>Occupancy Rate</p>
+                        <h2 id="stat-occupancy">0%</h2>
+                    </div>
+                    <div class="stat-card glass">
+                        <p>Total Bookings</p>
+                        <h2 id="stat-bookings">0</h2>
+                    </div>
+                </div>
+                
+                <div class="glass" style="padding:2rem;">
+                    <h3>Recent Reservations</h3>
+                    <div id="recent-reservations-list" style="margin-top:1.5rem;">
+                        <p style="color:var(--text-muted);">No recent bookings found.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-rooms" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                    <h3>Room Inventory</h3>
+                    <button class="btn btn-small">Add Room</button>
+                </div>
+                <div id="admin-rooms-list" class="glass" style="padding:0;">
+                    <!-- List will be populated -->
+                </div>
+            </div>
+
+            <div id="section-reservations" style="display:none;">
+                <h3>All Reservations</h3>
+                <div id="admin-reservations-list" class="glass" style="padding:1rem; margin-top:2rem;">
+                    <!-- Table header -->
+                    <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; font-weight:700; border-bottom:1px solid var(--gold); padding:10px;">
+                        <span>Guest</span>
+                        <span>Room ID</span>
+                        <span>Date</span>
+                        <span>Status</span>
+                    </div>
+                    <div id="reservations-table-body">
+                        <!-- Rows populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Dashboard logic
+        const showSection = (id) => {
+            const sections = ['overview', 'rooms', 'reservations'];
+            sections.forEach(s => {
+                document.getElementById('section-' + s).style.display = s === id ? 'block' : 'none';
+            });
+            document.getElementById('section-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+            if (id === 'overview' || id === 'reservations') loadReservations();
+            if (id === 'rooms') loadAdminRooms();
+        };
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const username = e.target[0].value;
+            const password = e.target[1].value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('login-container').style.display = 'none';
+                    document.getElementById('dashboard-container').style.display = 'flex';
+                    document.getElementById('admin-name').innerText = result.user.name;
+                    loadAdminData();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (err) {
+                alert('Login failed');
+            }
+        };
+
+        const logout = () => {
+            location.reload();
+        };
+
+        async function loadAdminData() {
+            await loadAdminRooms();
+            await loadReservations();
+        }
+
+        async function loadAdminRooms() {
+            const res = await fetch('/api/rooms');
+            const rooms = await res.json();
+            const list = document.getElementById('admin-rooms-list');
+            list.innerHTML = rooms.map(r => `
+                <div style="display:grid; grid-template-columns: 100px 1fr 100px 100px; padding:1rem; border-bottom:1px solid rgba(255,255,255,0.05); align-items:center;">
+                    <img src="${r.image}" style="width:60px; height:60px; border-radius:5px;">
+                    <div><strong>${r.type}</strong><br><small>${r.id}</small></div>
+                    <div style="color:${r.status === 'Available' ? '#4ade80' : '#f87171'}">${r.status}</div>
+                    <button class="btn-small btn" style="padding:5px 10px;">Edit</button>
+                </div>
+            `).join('');
+            
+            // Update occupancy rate
+            const occupiedCount = rooms.filter(r => r.status !== 'Available').length;
+            document.getElementById('stat-occupancy').innerText = Math.round((occupiedCount / rooms.length) * 100) + '%';
+        }
+
+        async function loadReservations() {
+            const res = await fetch('/api/reservations');
+            const reservations = await res.json();
+            
+            // Update table
+            const tableBody = document.getElementById('reservations-table-body');
+            tableBody.innerHTML = reservations.length ? reservations.map(res => `
+                <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span>${res.guestName}</span>
+                    <span>${res.roomId}</span>
+                    <span>${res.date}</span>
+                    <span style="color:#4ade80;">Confirmed</span>
+                </div>
+            `).join('') : '<p style="padding:20px; text-align:center; color:var(--text-muted);">No reservations found.</p>';
+
+            // Update stats
+            document.getElementById('stat-bookings').innerText = reservations.length;
+            document.getElementById('stat-revenue').innerText = '$' + (reservations.length * 200); // Simple estimate
+            
+            // Update Recent list in overview
+            const recentList = document.getElementById('recent-reservations-list');
+            recentList.innerHTML = reservations.slice(-3).reverse().map(res => `
+                <div class="glass" style="padding:10px; margin-bottom:10px; font-size:0.9rem;">
+                    <strong>${res.guestName}</strong> booked ${res.roomId} for ${res.date}
+                </div>
+            `).join('') || '<p>No recent activity.</p>';
+        }
+    </script>
+</body>
+</html>
