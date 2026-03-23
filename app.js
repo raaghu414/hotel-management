@@ -16,65 +16,77 @@ const closeModal = () => {
 // Fetch and load rooms
 async function loadRooms() {
     const container = document.getElementById('rooms-container');
-    let url = '/api/rooms';
-    
-    // Fallback for static hosts like GitHub Pages
-    if (window.location.hostname.includes('github.io')) url = 'data.json';
-
     try {
-        const response = await fetch(url);
-        let data = await response.json();
-        const rooms = url === 'data.json' ? data.rooms : data;
-        
-        container.innerHTML = rooms.map(room => `
-            <div class="card glass">
-                <img src="${room.image}" alt="${room.type}">
-                <div class="card-content">
-                    <h3>${room.type}</h3>
-                    <p>${room.description}</p>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
-                        <span class="price">$${room.price}/night</span>
-                        <button class="btn-small btn" onclick="openModal('${room.id}', '${room.type}')" ${room.status !== 'Available' ? 'disabled' : ''}>
-                            ${room.status === 'Available' ? 'Book Now' : 'Occupied'}
-                        </button>
-                    </div>
+        // Try the live API first
+        const response = await fetch('/api/rooms');
+        if (!response.ok) throw new Error('API unavailable');
+        const rooms = await response.json();
+        renderRooms(rooms);
+    } catch (err) {
+        // Fallback for static hosts (GitHub Pages)
+        try {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            renderRooms(data.rooms);
+        } catch (fallbackErr) {
+            container.innerHTML = `<p>Error loading rooms. Please check your connection.</p>`;
+        }
+    }
+}
+
+function renderRooms(rooms) {
+    const container = document.getElementById('rooms-container');
+    container.innerHTML = rooms.map(room => `
+        <div class="card glass">
+            <img src="${room.image}" alt="${room.type}">
+            <div class="card-content">
+                <h3>${room.type}</h3>
+                <p>${room.description}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
+                    <span class="price">$${room.price}/night</span>
+                    <button class="btn-small btn" onclick="openModal('${room.id}', '${room.type}')" ${room.status !== 'Available' ? 'disabled' : ''}>
+                        ${room.status === 'Available' ? 'Book Now' : 'Occupied'}
+                    </button>
                 </div>
             </div>
-        `).join('');
-    } catch (err) {
-        console.error(err);
-        container.innerHTML = `<p>Error loading rooms. Please check if the server is running.</p>`;
-    }
+        </div>
+    `).join('');
 }
 
 // Fetch and load menu
 async function loadMenu() {
     const container = document.getElementById('menu-container');
-    let url = '/api/menu';
-
-    if (window.location.hostname.includes('github.io')) url = 'data.json';
-
     try {
-        const response = await fetch(url);
-        let data = await response.json();
-        const menu = url === 'data.json' ? data.menu : data;
-        
-        container.innerHTML = menu.map(item => `
-            <div class="card glass" style="display:flex; padding: 1rem; gap:1.5rem; align-items:center;">
-                <img src="${item.image}" alt="${item.name}" style="width:100px; height:100px; border-radius:10px;">
-                <div style="flex:1;">
-                    <h3>${item.name}</h3>
-                    <p style="font-size:0.9rem; color:var(--text-muted);">${item.description}</p>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                        <span style="color:var(--gold); font-weight:700;">$${item.price}</span>
-                        <button class="btn-small btn" onclick="alert('Order placed for ${item.name}!')" style="padding: 5px 12px; font-size: 0.8rem;">Order Now</button>
-                    </div>
+        const response = await fetch('/api/menu');
+        if (!response.ok) throw new Error('API unavailable');
+        const menu = await response.json();
+        renderMenu(menu);
+    } catch (err) {
+        try {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            renderMenu(data.menu);
+        } catch (fallbackErr) {
+            container.innerHTML = `<p>Error loading menu.</p>`;
+        }
+    }
+}
+
+function renderMenu(menu) {
+    const container = document.getElementById('menu-container');
+    container.innerHTML = menu.map(item => `
+        <div class="card glass" style="display:flex; padding: 1rem; gap:1.5rem; align-items:center;">
+            <img src="${item.image}" alt="${item.name}" style="width:100px; height:100px; border-radius:10px;">
+            <div style="flex:1;">
+                <h3>${item.name}</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted);">${item.description}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                    <span style="color:var(--gold); font-weight:700;">$${item.price}</span>
+                    <button class="btn-small btn" onclick="alert('Order placed for ${item.name}!')" style="padding: 5px 12px; font-size: 0.8rem;">Order Now</button>
                 </div>
             </div>
-        `).join('');
-    } catch (err) {
-        container.innerHTML = `<p>Error loading menu.</p>`;
-    }
+        </div>
+    `).join('');
 }
 
 // Handle Booking Form
