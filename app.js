@@ -68,12 +68,36 @@ async function loadMenu() {
 // Handle Booking Form
 document.getElementById('booking-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const guestName = e.target[1].value.trim();
+    const email = e.target[2].value;
+    const date = e.target[3].value;
+    const guests = e.target[4].value;
+
+    if (!guestName) {
+        alert('Please enter your name.');
+        return;
+    }
+
+    const bookingDate = new Date(date);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    if (bookingDate < today) {
+        alert('Cannot book for a past date.');
+        return;
+    }
+
+    if (bookingDate.getFullYear() > 2030) {
+        alert('Please select a valid date.');
+        return;
+    }
+
     const formData = {
         roomId: document.getElementById('modal-room-id').value,
-        guestName: e.target[1].value,
-        email: e.target[2].value,
-        date: e.target[3].value,
-        guests: e.target[4].value
+        guestName,
+        email,
+        date,
+        guests
     };
 
     try {
