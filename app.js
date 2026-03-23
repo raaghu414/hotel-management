@@ -16,9 +16,15 @@ const closeModal = () => {
 // Fetch and load rooms
 async function loadRooms() {
     const container = document.getElementById('rooms-container');
+    let url = '/api/rooms';
+    
+    // Fallback for static hosts like GitHub Pages
+    if (window.location.hostname.includes('github.io')) url = 'data.json';
+
     try {
-        const response = await fetch('/api/rooms');
-        const rooms = await response.json();
+        const response = await fetch(url);
+        let data = await response.json();
+        const rooms = url === 'data.json' ? data.rooms : data;
         
         container.innerHTML = rooms.map(room => `
             <div class="card glass">
@@ -36,16 +42,22 @@ async function loadRooms() {
             </div>
         `).join('');
     } catch (err) {
-        container.innerHTML = `<p>Error loading rooms. Please try again later.</p>`;
+        console.error(err);
+        container.innerHTML = `<p>Error loading rooms. Please check if the server is running.</p>`;
     }
 }
 
 // Fetch and load menu
 async function loadMenu() {
     const container = document.getElementById('menu-container');
+    let url = '/api/menu';
+
+    if (window.location.hostname.includes('github.io')) url = 'data.json';
+
     try {
-        const response = await fetch('/api/menu');
-        const menu = await response.json();
+        const response = await fetch(url);
+        let data = await response.json();
+        const menu = url === 'data.json' ? data.menu : data;
         
         container.innerHTML = menu.map(item => `
             <div class="card glass" style="display:flex; padding: 1rem; gap:1.5rem; align-items:center;">
