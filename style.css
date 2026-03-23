@@ -56,10 +56,25 @@ nav {
 }
 
 .logo {
-    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--gold);
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+}
+
+.logo-img {
+    height: 45px;
+    width: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+}
+
+.logo-text {
+    font-family: 'Playfair Display', serif;
 }
 
 .nav-links {
